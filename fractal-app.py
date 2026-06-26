@@ -86,7 +86,7 @@ class Fractal:
         goto(width-22, height-55)
         write(f"{self.frac_full_name}", align = "right", font = ("Consolas", 30, "bold"))
         goto(width-22, height-88)
-        write(f"{"↑" if self.depth<self.max_depth else ""}/{"↓" if self.depth else " "}: recursion depth: {self.depth}", align = "right", font = ("Consolas", 20, "normal"))
+        write(f'{"↑" if self.depth<self.max_depth else ""}/{"↓" if self.depth else " "}: recursion depth: {self.depth}', align = "right", font = ("Consolas", 20, "normal"))
         w, h=EXIT_BUTTON_SIZE
         draw_rectangle(-width+22+w, height-h-22, w, h, "Esc: HOME")
         if self.par_usage:
