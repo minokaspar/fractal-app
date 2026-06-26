@@ -7,10 +7,31 @@ colormode(255)
 FRACTAL_BUTTON_CENTERS = [[-140, 75], [140, 75], [-140, -10], [140, -10], [-140, -95], [140, -95], [-140, -180], [140, -180]] # [[x1, y1], [x2, y2], ... ]
 FRACTAL_BUTTON_SIZE = [130, 30] # [width/2, height/2]
 EXIT_BUTTON_SIZE = [90, 30] # [width/2, height/2]
-COLORS = ["black", "purple", "green", "pink", "blue", "red", "brown"]
+COLORS = ["black", "purple", "green", "blue", "red", "brown"]
 execution_mode = "home"
 writing_color_index = 0
 
+
+def draw_rectangle(x, y, w, h, label = ""): # x: x center, y: y center, w: width/2, h: height/2, label: optional label
+    """ draw_rectangle(x: x center, y: y center, w: width/2, h: height/2, label: optional label) """
+    pensize(3)
+    color(COLORS[writing_color_index], "gray85")
+    pu()
+    goto(x-w, y-h)
+    pd()
+    begin_fill()
+    goto(x+w, y-h)
+    goto(x+w, y+h)
+    goto(x-w, y+h)
+    goto(x-w, y-h)
+    end_fill()
+    pu()
+    goto(x, y-15)
+    write(label, align = "center", font = ("Consolas", 20, "bold"))
+    
+    
+    
+    
 class Fractal:
     def __init__(self, index, frac_names = ["fractal", "good fractal"], max_depth = 5, start_pos_h = ((0, 0), 0), par_usage = False, parameter = 0, par_range = [], par_interval = 0, par_modulo = None, par_name = "unclassed parameter"):
         self.index = index
@@ -219,6 +240,7 @@ class Sierpinsky(Fractal):
         super().__init__(index, ["Sierpinsky", "Sierpinsky Polygon"], 5, ((0, 0), 0), True, 3, [3, 8], 1, None, "Anzahl Ecken")
     
     def _draw(self):
+        fillcolor("white")
         self.nodes = self.parameter
         self.coeffs = {3:3-1, 4:4-1.75, 5:5-2.38, 6:6-3, 7:7-3.75, 8:8-4.59}
         pu()
@@ -228,9 +250,11 @@ class Sierpinsky(Fractal):
     
     def sierpinski(self, depth, size):
         if depth == 0:
+            begin_fill()
             for _ in range(self.nodes):
                 forward(size)
                 left(360/self.nodes)
+            end_fill()
         else:
             for _ in range(self.nodes):
                 self.sierpinski(depth - 1, size/self.coeffs[self.nodes])
@@ -239,7 +263,7 @@ class Sierpinsky(Fractal):
 
 class Koch(Fractal):
     def __init__(self, index):
-        super().__init__(index, ["Koch", "Koch Stern"], 7, ((-250, 120), 0))
+        super().__init__(index, ["Koch", "Koch Stern"], 7, ((-250, 110), 0))
     
     def _draw(self):
         for _ in range(3):
@@ -280,68 +304,57 @@ class Blitz(Fractal):
         super().__init__(index, ["Blitz", "Blitz Kurve"], 9, ((0, -270), 90), True, 70, [45, 135], 1, 360, "Winkel")
     
     def _draw(self):
-        self.schenkel = 1/2/math.sin(math.radians(self.parameter)) # berechnet die Länge der beiden anderen Linien, Quelle: Internet
-        self.basis = 1/math.tan(math.radians(self.parameter)) # berechnet die Länge der mittleren horizontalen Linie, Quelle: Internet
+        self.angle = self.parameter
+        self.schenkel = 1/2/math.sin(math.radians(self.angle)) # berechnet die Länge der beiden anderen Linien, Quelle: Internet
+        self.basis = 1/math.tan(math.radians(self.angle)) # berechnet die Länge der mittleren horizontalen Linie, Quelle: Internet
         self.blitz(self.depth, 500)
     
     def blitz(self, depth, size):
         if depth == 0:
             fd(size)
         else:
-            rt(90-self.parameter)
+            rt(90-self.angle)
             self.blitz(depth-1, size*self.schenkel)
-            lt(180-self.parameter)
+            lt(180-self.angle)
             self.blitz(depth-1, size*self.basis)
-            rt(180-self.parameter)
+            rt(180-self.angle)
             self.blitz(depth-1, size*self.schenkel)
-            lt(90-self.parameter)
+            lt(90-self.angle)
 
 class Dragon(Fractal):
     def __init__(self, index):
         super().__init__(index, ["Drachenkurve", "Drachenkurve"], 15, ((0, -30), 0), True, 90, [], 2, 360, "Winkel")
     
     def _draw(self):
-        self.dragoncurve(self.depth, 220, 1)
-    
-    def dragoncurve(self, depth, size, direction):
+        self.angle = self.parameter
+        self.drachenkurve(self.depth, 220, 1)
+
+    def drachenkurve(self, depth, size, direction):
         if depth == 0:
             forward(size)
         else:
-            self.dragoncurve(depth - 1, size/1.41, 1)
-            right(self.parameter * direction)
-            self.dragoncurve(depth - 1, size/1.41, -1)
+            self.drachenkurve(depth - 1, size/1.41, 1)
+            right(self.angle * direction)
+            self.drachenkurve(depth - 1, size/1.41, -1)
 
-def draw_rectangle(x, y, w, h, label = ""): # x: x center, y: y center, w: width/2, h: height/2, label: optional label
-    """ draw_rectangle(x: x center, y: y center, w: width/2, h: height/2, label: optional label) """
-    pensize(3)
-    color(COLORS[writing_color_index], "gray85")
-    pu()
-    goto(x-w, y-h)
-    pd()
-    begin_fill()
-    goto(x+w, y-h)
-    goto(x+w, y+h)
-    goto(x-w, y+h)
-    goto(x-w, y-h)
-    end_fill()
-    pu()
-    goto(x, y-15)
-    write(label, align = "center", font = ("Consolas", 20, "bold"))
 
 class Home:
     def draw(self):
         "draw homescreen"
         global execution_mode
         """ create menu with title and buttons """
+        execution_mode = "drawing"
         clear()
         penup()
         pencolor(COLORS[writing_color_index])
         goto(0, 150)
-        write("Informatik Projekt Fraktale", align = "center", font = ("Consolas", 20, "bold"))
+        write("Informatik Projekt: rekursive Fraktale", align = "center", font = ("Consolas", 20, "bold"))
         pensize(3)
         w, h = EXIT_BUTTON_SIZE
         width = window_width()//2
         height = window_height()//2
+        goto(0,-height+20)
+        write("von Mino Kaspar (KSL) und Nicolas Brändle (KSL)", align = "center", font = ("Consolas", 15, "italic"))
         draw_rectangle(-width+22+w, height-h-22, w, h, "Esc: EXIT")
         for frac in frac_objs:
             frac.draw_button()
@@ -367,7 +380,7 @@ class Home:
     
     def get_chosen(self):
         global current_obj
-        current_obj=self
+        current_obj = self
         self.draw()
 
 def click(x, y):
@@ -382,6 +395,6 @@ onscreenclick(click, 1)
 def key(k): return current_obj.keypress(k)
 for k in list(range(1, len(frac_objs) + 1)) + ["Up", "Down", "Escape", "Left", "Right", "c"]:
     onkeypress(lambda x=k: key(x), k) # bind each key to the "key" function, with a different argument
-    # lambda x=k: freezes the current value of k (so each key does a different thing)
+    # lambda x=k: freezes the current value of k (so each key does a different thing)  else it would be a refernce to the end value
 listen()
 done()
